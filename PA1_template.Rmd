@@ -5,21 +5,79 @@ output:
     keep_md: true
 ---
 
+## Libraries used
+```r
+library(ggplot2)
+```
 
 ## Loading and preprocessing the data
-
+```r
+activities <- read.csv("activity.csv")
+activities$date <- as.Date(activities$date)
+```
 
 
 ## What is mean total number of steps taken per day?
-
-
+```r
+daily <- aggregate(steps ~ date, data = activities, sum)
+hist(daily$steps)
+summary(daily$steps)
+```
 
 ## What is the average daily activity pattern?
 
+```r
+inter <- aggregate(steps ~ interval, data = activities, mean)
+qplot(interval, steps, data = inter, geom = "line", main = "Average Steps Per Interval", xlab = "Interval", ylab= "Number of Steps")
+```
 
+Finding the interval with the maximum average number of steps
+```r
+inter[which(inter$steps == max(inter$steps)),1]
+```
 
 ## Imputing missing values
 
+Total number of missing intervals:
+```r
+miss <- sum(is.na(activities$steps))
+```
 
+Simple strategy for filling in all of the missing values by using the average for that interval.
+Acto is the new data frame with imputed values replacing the missing values in the original data frame.
+
+```r
+acto <- merge(activities, inter, by = "interval")
+acto <- acto[order(acto$date),]
+acto$steps.x[is.na(acto$steps.x)] <- acto$steps.y[is.na(acto$steps.x)]
+names(acto)[2] <- "steps"
+acto <- acto[, c("interval", "steps", "date")]
+``` 
+Calculate the total number of steps taken each day
+```r
+daily.acto <- aggregate(steps ~ date, data= acto, sum)
+hist(daily.acto$steps)
+```
+
+Calculate the mean and median, compare to original data
+```r
+summary(daily.acto$steps)
+
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+New variable, in the imputed data, indicating whether the observation is a weekday or weekend. 
+```r
+acto$day <- weekdays(acto$date)
+acto$day <- ifelse(grepl("Saturday|Sunday",acto$day),"weekend", "weekday")
+acto$day <- as.factor(acto$day)
+```
+
+```r
+weekdaily <- aggregate(steps ~ interval + day, acto, mean)
+p <- ggplot(aes(x = interval, y = steps), data = weekdaily) + 
+        geom_line() + 
+        facet_grid(day~.)
+p
+```
