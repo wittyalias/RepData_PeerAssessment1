@@ -33,6 +33,7 @@ hist(daily$steps, xlab = "Daily Steps", ylab = "Frequency", main = "Histogram of
 ```
 
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+The summary data shows a mean number of steps per day at 10,770, with a median number of steps per day at 10,760. 
 
 ```r
 summary(daily$steps)
@@ -44,7 +45,7 @@ summary(daily$steps)
 ```
 
 ## What is the average daily activity pattern?
-The understand the average daily activity pattern first the activities data is aggregated by interval, calculating the average of number of steps in that interval across days, into a new data frame _inter_. The plot of the steps on interval, shows a distinct period of higher step activity from around 8 am to around 9 am, peaking at over 200 average steps. After that, the number of steps is decidedly lower and the graph shows the average vacillating around 50 steps per interval until around 7 pm. 
+The understand the average daily activity pattern first the activities data is aggregated by interval, calculating the average of number of steps in that interval across days, into a new data frame _inter_. The plot of the steps on interval shows a distinct period of higher step activity from around 8 am to around 9 am, peaking at over 200 average steps. After that, the number of steps is decidedly lower and the graph shows the average vacillating around 50 steps per interval until around 7 pm. 
 
 
 ```r
@@ -52,9 +53,9 @@ inter <- aggregate(steps ~ interval, data = activities, mean)
 qplot(interval, steps, data = inter, geom = "line", main = "Average Steps Per Interval", xlab = "Interval", ylab= "Number of Steps")
 ```
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
 
-The interval with the higheset average number of steps is 8:35 am, and returned by the code below. 
+The interval with the maximum average number of steps is 8:35 am, with 206 steps, and is returned by the code below. 
 
 ```r
 inter[which(inter$steps == max(inter$steps)),]
@@ -96,9 +97,9 @@ daily.acto <- aggregate(steps ~ date, data= acto, sum)
 hist(daily.acto$steps, main = "Histogram of Daily Steps\nwith Imputed Values Replacing Missing", xlab = "Daily Steps")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
-The code below returns the summare data for both the imputed and original daily steps. Note that the mean doesn't change, which is to be expected since we are just adding average values with the impuation. However, the median (and the quintiles do change) because the impuation changes the number of observations in each bin. 
+The code below returns the summary data for both the imputed and original daily steps. Note that the mean doesn't change, which is to be expected since we are just adding average values with the impuation. However, the median (and the quintiles do change) because the impuation changes the number of observations in each bin. 
 
 ```r
 summary(daily.acto$steps)
@@ -120,8 +121,7 @@ summary(daily$steps)
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-New variable, in the imputed data, indicating whether the observation is a weekday or weekend. 
-
+To determine whether there are differences in step activity between weekdays or weekend days, a new variable was added to _acto_ (the imputed data frame) identifying the dates as weekdays or weekends. 
 
 ```r
 echo = TRUE
@@ -130,13 +130,36 @@ acto$day <- ifelse(grepl("Saturday|Sunday",acto$day),"weekend", "weekday")
 acto$day <- as.factor(acto$day)
 ```
 
+The plot of the weekend vs weekday data shows distinct differences in the average steps per interval. Both sets still have the highest activity around 8-9 am, but the weekend steps during that peak are decidedly fewer. However, during the rest of the weekend, the average step activity appears to be noticably higher. 
 
 ```r
 weekdaily <- aggregate(steps ~ interval + day, acto, mean)
-p <- ggplot(aes(x = interval, y = steps), data = weekdaily) + 
+ggplot(aes(x = interval, y = steps), data = weekdaily) + 
         geom_line() + 
-        facet_grid(day~.)
-print(p)
+        facet_grid(day~.) +
+        xlab("Inerval") +
+        ylab("Steps") +
+        ggtitle("Average Number of Steps per Interval")
 ```
 
-![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
+The summary data for the weekends and weekdays confirm that both the mean and the median number of steps during the weekend are higher than the weekdays, even though the peak is much lower. 
+
+
+```r
+summary(weekdaily[weekdaily$day =="weekend", "steps"])
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   0.000   1.241  32.340  42.370  74.650 166.600
+```
+
+```r
+summary(weekdaily[weekdaily$day =="weekday", "steps"])
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   0.000   2.247  25.800  35.610  50.850 230.400
+```

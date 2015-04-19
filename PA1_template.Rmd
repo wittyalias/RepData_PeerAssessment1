@@ -27,6 +27,9 @@ The summary data shows a mean number of steps per day at 10,770, with a median n
 ```{r}
 daily <- aggregate(steps ~ date, data = activities, sum)
 hist(daily$steps, xlab = "Daily Steps", ylab = "Frequency", main = "Histogram of Daily Steps")
+```
+The summary data shows a mean number of steps per day at 10,770, with a median number of steps per day at 10,760. 
+```{r}
 summary(daily$steps)
 ```
 
@@ -38,7 +41,7 @@ inter <- aggregate(steps ~ interval, data = activities, mean)
 qplot(interval, steps, data = inter, geom = "line", main = "Average Steps Per Interval", xlab = "Interval", ylab= "Number of Steps")
 ```
 
-The interval with the higheset average number of steps is 8:35 am, and returned by the code below. 
+The interval with the maximum average number of steps is 8:35 am, with 206 steps, and is returned by the code below. 
 ```{r}
 inter[which(inter$steps == max(inter$steps)),]
 ```
@@ -67,7 +70,7 @@ daily.acto <- aggregate(steps ~ date, data= acto, sum)
 hist(daily.acto$steps, main = "Histogram of Daily Steps\nwith Imputed Values Replacing Missing", xlab = "Daily Steps")
 ```
 
-The code below returns the summare data for both the imputed and original daily steps. Note that the mean doesn't change, which is to be expected since we are just adding average values with the impuation. However, the median (and the quintiles do change) because the impuation changes the number of observations in each bin. 
+The code below returns the summary data for both the imputed and original daily steps. Note that the mean doesn't change, which is to be expected since we are just adding average values with the impuation. However, the median (and the quintiles do change) because the impuation changes the number of observations in each bin. 
 ```{r}
 summary(daily.acto$steps)
 summary(daily$steps)
@@ -75,7 +78,6 @@ summary(daily$steps)
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-New variable, in the imputed data, indicating whether the observation is a weekday or weekend. 
 To determine whether there are differences in step activity between weekdays or weekend days, a new variable was added to _acto_ (the imputed data frame) identifying the dates as weekdays or weekends. 
 ```{r} 
 echo = TRUE
